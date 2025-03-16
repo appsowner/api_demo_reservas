@@ -1,0 +1,629 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "API de Reservas Médicas",
+        "description": "Documentación interactiva para la API de reservas médicas.  Autenticación: `Bearer Token JWT`",
+        "contact": {
+            "email": "tuemail@example.com"
+        }
+    },
+    "host": "localhost:5000",
+    "basePath": "/",
+    "schemes": [
+        "http"
+    ],
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "Ingrese su token JWT en el formato 'Bearer [token]'"
+        }
+    },
+    "paths": {
+        "/api/login": {
+            "post": {
+                "summary": "Obtener token JWT",
+                "description": "Obtiene un token JWT para autenticarse en los endpoints protegidos.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Credenciales de usuario",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Token JWT generado correctamente",
+                        "schema": {
+                            "$ref": "#/definitions/LoginResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Credenciales inválidas"
+                    }
+                }
+            }
+        },
+        "/api/reservas/examenes": {
+            "get": {
+                "summary": "Listar reservas de exámenes",
+                "description": "Obtiene una lista de todas las reservas de exámenes.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "paciente_id",
+                        "in": "query",
+                        "description": "Filtrar reservas por ID de paciente",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de reservas de exámenes",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ReservaExamen"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    }
+                }
+            }
+        },
+        "/api/reservas/examenes/{id}": {
+            "get": {
+                "summary": "Obtener detalles de una reserva de examen",
+                "description": "Obtiene los detalles de una reserva de examen específica por su ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la reserva de examen",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la reserva de examen",
+                        "schema": {
+                            "$ref": "#/definitions/ReservaExamenDetalle"
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Reserva no encontrada"
+                    }
+                }
+            }
+        },
+        "/api/reservas/consultas": {
+            "get": {
+                "summary": "Listar reservas de consultas médicas",
+                "description": "Obtiene una lista de todas las reservas de consultas médicas.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "paciente_id",
+                        "in": "query",
+                        "description": "Filtrar reservas por ID de paciente",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "doctor_id",
+                        "in": "query",
+                        "description": "Filtrar reservas por ID de doctor",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "especialidad",
+                        "in": "query",
+                        "description": "Filtrar reservas por especialidad",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de reservas de consultas médicas",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ReservaConsulta"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    }
+                }
+            }
+        },
+        "/api/reservas/consultas/{id}": {
+            "get": {
+                "summary": "Obtener detalles de una reserva de consulta médica",
+                "description": "Obtiene los detalles de una reserva de consulta médica específica por su ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la reserva de consulta médica",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalles de la reserva de consulta médica",
+                        "schema": {
+                            "$ref": "#/definitions/ReservaConsultaDetalle"
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    },
+                    "404": {
+                        "description": "Reserva no encontrada"
+                    }
+                }
+            }
+        },
+        "/api/pacientes": {
+            "get": {
+                "summary": "Listar pacientes",
+                "description": "Obtiene una lista de todos los pacientes. Requiere rol de `admin` o `medico`.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de pacientes",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Paciente"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    },
+                    "403": {
+                        "description": "No tiene permisos para acceder a este recurso"
+                    }
+                }
+            }
+        },
+        "/api/examenes": {
+            "get": {
+                "summary": "Listar exámenes",
+                "description": "Obtiene una lista de todos los exámenes disponibles.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de exámenes",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Examen"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    }
+                }
+            }
+        },
+        "/api/doctores": {
+            "get": {
+                "summary": "Listar doctores",
+                "description": "Obtiene una lista de todos los doctores.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de doctores",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Doctor"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    }
+                }
+            }
+        },
+        "/api/especialidades": {
+            "get": {
+                "summary": "Listar especialidades",
+                "description": "Obtiene una lista de todas las especialidades médicas.",
+                "produces": [
+                    "application/json"
+                ],
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de especialidades",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "No autorizado"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "LoginRequest": {
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "example": "admin"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "admin123"
+                }
+            },
+            "required": [
+                "username",
+                "password"
+            ]
+        },
+        "LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "expires_in": {
+                    "type": "integer",
+                    "example": 3600
+                },
+                "token_type": {
+                    "type": "string",
+                    "example": "Bearer"
+                },
+                "user": {
+                    "$ref": "#/definitions/User"
+                }
+            }
+        },
+        "User": {
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string",
+                    "example": "admin"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "admin"
+                }
+            }
+        },
+        "ReservaExamen": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "RE001"
+                },
+                "paciente_id": {
+                    "type": "string",
+                    "example": "12345678-9"
+                },
+                "examenes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "example": "E001"
+                    }
+                },
+                "fecha": {
+                    "type": "string",
+                    "example": "2025-03-20"
+                },
+                "hora": {
+                    "type": "string",
+                    "example": "09:00"
+                },
+                "estado": {
+                    "type": "string",
+                    "example": "confirmada"
+                },
+                "centro_medico": {
+                    "type": "string",
+                    "example": "Clínica Las Condes"
+                },
+                "notas": {
+                    "type": "string",
+                    "example": "Paciente debe venir en ayunas"
+                }
+            }
+        },
+        "ReservaExamenDetalle": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "RE001"
+                },
+                "paciente_id": {
+                    "type": "string",
+                    "example": "12345678-9"
+                },
+                "examenes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "example": "E001"
+                    }
+                },
+                "examenes_detalle": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Examen"
+                    }
+                },
+                "fecha": {
+                    "type": "string",
+                    "example": "2025-03-20"
+                },
+                "hora": {
+                    "type": "string",
+                    "example": "09:00"
+                },
+                "estado": {
+                    "type": "string",
+                    "example": "confirmada"
+                },
+                "centro_medico": {
+                    "type": "string",
+                    "example": "Clínica Las Condes"
+                },
+                "notas": {
+                    "type": "string",
+                    "example": "Paciente debe venir en ayunas"
+                },
+                "paciente": {
+                    "$ref": "#/definitions/Paciente"
+                }
+            }
+        },
+        "ReservaConsulta": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "RC001"
+                },
+                "paciente_id": {
+                    "type": "string",
+                    "example": "12345678-9"
+                },
+                "doctor_id": {
+                    "type": "string",
+                    "example": "D002"
+                },
+                "especialidad": {
+                    "type": "string",
+                    "example": "Cardiología"
+                },
+                "fecha": {
+                    "type": "string",
+                    "example": "2025-03-25"
+                },
+                "hora": {
+                    "type": "string",
+                    "example": "16:00"
+                },
+                "estado": {
+                    "type": "string",
+                    "example": "confirmada"
+                },
+                "centro_medico": {
+                    "type": "string",
+                    "example": "Clínica Santa María"
+                },
+                "motivo": {
+                    "type": "string",
+                    "example": "Control anual"
+                },
+                "notas": {
+                    "type": "string",
+                    "example": "Traer exámenes previos"
+                }
+            }
+        },
+        "ReservaConsultaDetalle": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "RC001"
+                },
+                "paciente_id": {
+                    "type": "string",
+                    "example": "12345678-9"
+                },
+                "doctor_id": {
+                    "type": "string",
+                    "example": "D002"
+                },
+                "especialidad": {
+                    "type": "string",
+                    "example": "Cardiología"
+                },
+                "fecha": {
+                    "type": "string",
+                    "example": "2025-03-25"
+                },
+                "hora": {
+                    "type": "string",
+                    "example": "16:00"
+                },
+                "estado": {
+                    "type": "string",
+                    "example": "confirmada"
+                },
+                "centro_medico": {
+                    "type": "string",
+                    "example": "Clínica Santa María"
+                },
+                "motivo": {
+                    "type": "string",
+                    "example": "Control anual"
+                },
+                "notas": {
+                    "type": "string",
+                    "example": "Traer exámenes previos"
+                },
+                "paciente": {
+                    "$ref": "#/definitions/Paciente"
+                },
+                "doctor": {
+                    "$ref": "#/definitions/Doctor"
+                }
+            }
+        },
+        "Paciente": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "12345678-9"
+                },
+                "nombre": {
+                    "type": "string",
+                    "example": "Juan Pérez"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "juan.perez@ejemplo.cl"
+                },
+                "telefono": {
+                    "type": "string",
+                    "example": "+56912345678"
+                }
+            }
+        },
+        "Examen": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "E001"
+                },
+                "nombre": {
+                    "type": "string",
+                    "example": "Hemograma"
+                },
+                "duracion": {
+                    "type": "integer",
+                    "example": 15
+                }
+            }
+        },
+        "Doctor": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "D001"
+                },
+                "nombre": {
+                    "type": "string",
+                    "example": "Dr. Rodrigo Silva"
+                },
+                "especialidad": {
+                    "type": "string",
+                    "example": "Medicina General"
+                }
+            }
+        }
+    }
+}
